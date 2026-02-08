@@ -1,0 +1,190 @@
+# Comprehensive logging configuration for Temporal Distribution Shift Detector
+# This file provides structured logging setup for development and production environments
+
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  detailed:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+  simple:
+    format: '%(levelname)s - %(name)s - %(message)s'
+
+  json:
+    format: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "function": "%(funcName)s", "line": %(lineno)d, "message": "%(message)s"}'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+  performance:
+    format: 'PERF - %(asctime)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+  file_detailed:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: logs/temporal_detector.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+
+  file_errors:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detailed
+    filename: logs/errors.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 3
+    encoding: utf8
+
+  file_drift:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: detailed
+    filename: logs/drift_detection.log
+    maxBytes: 5242880  # 5MB
+    backupCount: 3
+    encoding: utf8
+
+  file_performance:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: performance
+    filename: logs/performance.log
+    maxBytes: 5242880  # 5MB
+    backupCount: 3
+    encoding: utf8
+
+  file_training:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: detailed
+    filename: logs/training.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: utf8
+
+  file_json:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: logs/structured.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 3
+    encoding: utf8
+
+loggers:
+  # Root logger
+  root:
+    level: INFO
+    handlers: [console, file_detailed, file_errors]
+    propagate: false
+
+  # Main application modules
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting:
+    level: INFO
+    handlers: [console, file_detailed, file_errors]
+    propagate: false
+
+  # Model components - detailed logging for debugging
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.models:
+    level: DEBUG
+    handlers: [file_detailed, file_drift]
+    propagate: true
+
+  # Drift detection - special logging for monitoring
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.models.model.DriftDetector:
+    level: DEBUG
+    handlers: [file_drift]
+    propagate: true
+
+  # Training pipeline
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.training:
+    level: INFO
+    handlers: [console, file_training]
+    propagate: true
+
+  # Data processing
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.data:
+    level: INFO
+    handlers: [file_detailed]
+    propagate: true
+
+  # Evaluation and metrics
+  temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.evaluation:
+    level: INFO
+    handlers: [file_detailed, file_performance]
+    propagate: true
+
+  # Performance monitoring - special logger for metrics
+  performance:
+    level: INFO
+    handlers: [file_performance, file_json]
+    propagate: false
+
+  # MLflow integration
+  mlflow:
+    level: WARNING  # Reduce MLflow verbosity
+    handlers: [file_detailed]
+    propagate: false
+
+  # External libraries - reduce verbosity
+  xgboost:
+    level: WARNING
+    handlers: [file_detailed]
+    propagate: false
+
+  lightgbm:
+    level: WARNING
+    handlers: [file_detailed]
+    propagate: false
+
+  catboost:
+    level: WARNING
+    handlers: [file_detailed]
+    propagate: false
+
+  sklearn:
+    level: WARNING
+    handlers: [file_detailed]
+    propagate: false
+
+  matplotlib:
+    level: WARNING
+    handlers: [file_detailed]
+    propagate: false
+
+# Environment-specific overrides
+development:
+  loggers:
+    root:
+      level: DEBUG
+    temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting:
+      level: DEBUG
+
+production:
+  loggers:
+    root:
+      level: INFO
+    temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting:
+      level: INFO
+    temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting.models:
+      level: INFO  # Reduce debug verbosity in production
+
+testing:
+  handlers:
+    console:
+      level: WARNING  # Reduce console output during tests
+  loggers:
+    root:
+      level: WARNING
+    temporal_distribution_shift_detector_with_adaptive_ensemble_reweighting:
+      level: WARNING

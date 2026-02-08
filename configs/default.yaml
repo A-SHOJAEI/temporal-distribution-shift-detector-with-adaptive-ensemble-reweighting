@@ -1,0 +1,136 @@
+# Default configuration for Temporal Distribution Shift Detector
+# with Adaptive Ensemble Reweighting
+
+# Global settings
+random_seed: 42
+log_level: INFO
+output_dir: outputs
+
+# Model configuration
+model:
+  # Drift detector settings
+  drift_detector:
+    window_size: 1000
+    alpha: 0.05
+    detection_threshold: 0.1
+    min_samples: 100
+
+  # Bayesian reweighter settings
+  reweighter:
+    initial_alpha: 1.0
+    initial_beta: 1.0
+    decay_factor: 0.95
+    exploration_factor: 0.1
+
+  # Base model configurations
+  base_models:
+    xgboost:
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+
+    lightgbm:
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+      verbose: -1
+
+    catboost:
+      iterations: 100
+      depth: 6
+      learning_rate: 0.1
+      random_seed: 42
+      verbose: false
+
+  # Ensemble settings
+  adaptation_threshold: 0.1
+  max_ensemble_size: 3
+  random_state: 42
+
+# Data configuration
+data:
+  dataset_name: covertype  # Options: covertype, elec2, airlines
+  data_path: null  # Will use built-in datasets if null
+  batch_size: 1000
+  validation_split: 0.2
+  test_split: 0.2
+
+  # Preprocessing
+  scaler_type: standard  # Options: standard, robust, minmax
+  handle_missing: median  # Options: median, mean, mode
+  feature_selection: null  # Options: null, variance, mutual_info
+  n_features: null  # Number of features to select (null = auto)
+
+  # Drift injection for simulation
+  drift_schedule:
+    10: covariate_shift
+    25: concept_drift
+    40: label_shift
+    55: combined
+  drift_types:
+    - covariate_shift
+    - label_shift
+    - concept_drift
+  drift_severity: 0.3
+
+# Training configuration
+training:
+  # General training
+  max_epochs: 100
+  early_stopping_patience: 10
+  early_stopping_min_delta: 0.001
+
+  # Online learning settings
+  streaming_mode: false
+  update_frequency: 100
+  evaluation_frequency: 500
+  max_samples: null  # Process all available samples if null
+
+  # Checkpointing
+  checkpoint_dir: checkpoints
+  save_frequency: 1000
+  keep_checkpoints: 5
+
+  # Evaluation during training
+  eval_window_size: 1000
+  eval_metrics:
+    - accuracy
+    - f1
+    - precision
+    - recall
+
+# MLflow tracking configuration
+mlflow:
+  tracking_uri: null  # Use default MLflow tracking
+  experiment_name: temporal_distribution_shift_detection
+  run_name: null  # Auto-generated if null
+  log_artifacts: true
+  log_models: true
+
+  # Autologging
+  autolog_models: true
+  autolog_metrics: true
+  autolog_params: true
+
+# Evaluation configuration
+evaluation:
+  # Streaming evaluation settings
+  prequential_window_size: 1000
+  drift_tolerance_window: 100
+
+  # Target metrics (research objectives)
+  target_prequential_accuracy: 0.82
+  target_drift_detection_f1: 0.9
+  target_adaptation_latency: 500
+  target_regret_vs_oracle: 0.05
+
+  # Analysis and visualization
+  plot_results: true
+  save_plots: true
+  plot_dir: plots

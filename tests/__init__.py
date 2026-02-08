@@ -1,0 +1,1 @@
+"""Test suite for temporal distribution shift detector."""

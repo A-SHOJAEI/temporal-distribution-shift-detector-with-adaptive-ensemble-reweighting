@@ -1,0 +1,136 @@
+# Ablation study configuration for Temporal Distribution Shift Detector
+# This configuration disables adaptive reweighting to evaluate its contribution
+
+# Global settings
+random_seed: 42
+log_level: INFO
+output_dir: outputs/ablation
+
+# Model configuration
+model:
+  # Drift detector settings (same as default)
+  drift_detector:
+    window_size: 1000
+    alpha: 0.05
+    detection_threshold: 0.1
+    min_samples: 100
+
+  # Bayesian reweighter settings - DISABLED for ablation
+  # Setting exploration_factor to 0 and using uniform initial priors
+  # effectively disables adaptive reweighting
+  reweighter:
+    initial_alpha: 1.0
+    initial_beta: 1.0
+    decay_factor: 1.0  # Changed from 0.95 - no decay
+    exploration_factor: 0.0  # Changed from 0.1 - no exploration
+
+  # Base model configurations (same as default)
+  base_models:
+    xgboost:
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+
+    lightgbm:
+      n_estimators: 100
+      max_depth: 6
+      learning_rate: 0.1
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+      verbose: -1
+
+    catboost:
+      iterations: 100
+      depth: 6
+      learning_rate: 0.1
+      random_seed: 42
+      verbose: false
+
+  # Ensemble settings
+  adaptation_threshold: 1.0  # Changed from 0.1 - high threshold to prevent adaptation
+  max_ensemble_size: 3
+  random_state: 42
+
+# Data configuration (same as default)
+data:
+  dataset_name: covertype
+  data_path: null
+  batch_size: 1000
+  validation_split: 0.2
+  test_split: 0.2
+
+  # Preprocessing
+  scaler_type: standard
+  handle_missing: median
+  feature_selection: null
+  n_features: null
+
+  # Drift injection for simulation
+  drift_schedule:
+    10: covariate_shift
+    25: concept_drift
+    40: label_shift
+    55: combined
+  drift_types:
+    - covariate_shift
+    - label_shift
+    - concept_drift
+  drift_severity: 0.3
+
+# Training configuration (same as default)
+training:
+  max_epochs: 100
+  early_stopping_patience: 10
+  early_stopping_min_delta: 0.001
+
+  # Online learning settings
+  streaming_mode: false
+  update_frequency: 100
+  evaluation_frequency: 500
+  max_samples: null
+
+  # Checkpointing
+  checkpoint_dir: checkpoints/ablation
+  save_frequency: 1000
+  keep_checkpoints: 5
+
+  # Evaluation during training
+  eval_window_size: 1000
+  eval_metrics:
+    - accuracy
+    - f1
+    - precision
+    - recall
+
+# MLflow tracking configuration
+mlflow:
+  tracking_uri: null
+  experiment_name: temporal_distribution_shift_detection_ablation
+  run_name: null
+  log_artifacts: true
+  log_models: true
+
+  # Autologging
+  autolog_models: true
+  autolog_metrics: true
+  autolog_params: true
+
+# Evaluation configuration (same as default)
+evaluation:
+  prequential_window_size: 1000
+  drift_tolerance_window: 100
+
+  # Target metrics (research objectives)
+  target_prequential_accuracy: 0.82
+  target_drift_detection_f1: 0.9
+  target_adaptation_latency: 500
+  target_regret_vs_oracle: 0.05
+
+  # Analysis and visualization
+  plot_results: true
+  save_plots: true
+  plot_dir: plots/ablation

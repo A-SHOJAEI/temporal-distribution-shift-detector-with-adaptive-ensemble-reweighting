@@ -114,12 +114,20 @@ Test-then-train evaluation for streaming scenarios.
 └── configs/            # Configuration files
 ```
 
+## Methodology
+
+This work introduces a novel approach to handling temporal distribution shifts through adaptive ensemble reweighting with Bayesian online learning. Unlike traditional drift detectors that trigger explicit model retraining, our method continuously adapts ensemble weights based on recent performance patterns across detected data regimes.
+
+The key innovation is a Thompson sampling-based Bayesian reweighting mechanism that maintains Beta distributions over each base learner's success probability. As data streams through the system, the drift detector (combining KS tests, prediction confidence monitoring, and label distribution analysis) identifies regime changes. The reweighter then updates its beliefs about each learner's effectiveness in the current regime and samples new weights accordingly, enabling both exploration of underperforming models and exploitation of currently effective ones.
+
+This approach provides theoretical regret bounds in non-stationary environments while avoiding the computational overhead and catastrophic forgetting risks associated with full model retraining. The ensemble naturally adapts to covariate shifts, label shifts, and concept drift without requiring labeled data for each incoming batch.
+
 ## Research Contributions
 
-1. **Novel ensemble reweighting** approach using Bayesian online learning
+1. **Novel ensemble reweighting** approach using Bayesian online learning with Thompson sampling
 2. **Theoretical regret bounds** for non-stationary streaming environments
-3. **Multi-modal drift detection** without explicit retraining triggers
-4. **Comprehensive evaluation** framework for temporal shift scenarios
+3. **Multi-modal drift detection** combining statistical tests and performance monitoring
+4. **Adaptation without retraining** avoiding catastrophic forgetting and computational overhead
 
 ## License
 

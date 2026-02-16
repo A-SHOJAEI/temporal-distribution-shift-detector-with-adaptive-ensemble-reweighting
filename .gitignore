@@ -188,3 +188,4 @@ data/raw/
 data/processed/
 .venv/
 *.pyc
+*.egg-info

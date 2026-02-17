@@ -1,0 +1,10 @@
+{
+  "dataset": "sklearn Covertype (581,012 samples, 54 features, 7 classes)",
+  "model": "Adaptive Ensemble (XGBoost 70.7%, LightGBM 16.4%, CatBoost 12.9%)",
+  "test_accuracy": 0.786,
+  "validation_accuracy": 0.785,
+  "random_baseline": 0.143,
+  "training_time_seconds": 60.55,
+  "data_leakage": false,
+  "train_test_split": "80/20 stratified"
+}

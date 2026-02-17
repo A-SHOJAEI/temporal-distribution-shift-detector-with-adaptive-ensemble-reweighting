@@ -183,10 +183,17 @@ def train_batch_mode(
     """
     logger.info("Starting batch training...")
 
+    # Split data BEFORE training to prevent data leakage
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=config.random_seed, stratify=y
+    )
+    logger.info(f"Train size: {len(X_train)}, Test size: {len(X_test)}")
+
     start_time = time.time()
 
-    # Train the model
-    model = trainer.fit(X, y)
+    # Train only on training data
+    model = trainer.fit(X_train, y_train)
 
     training_time = time.time() - start_time
 
@@ -198,11 +205,7 @@ def train_batch_mode(
     for key, value in summary.items():
         logger.info(f"  {key}: {value}")
 
-    # Make predictions on a held-out test set
-    test_size = int(0.2 * len(X))
-    X_test = X[-test_size:]
-    y_test = y[-test_size:]
-
+    # Evaluate on held-out test set
     predictions, probabilities = trainer.predict(X_test)
 
     # Calculate test accuracy

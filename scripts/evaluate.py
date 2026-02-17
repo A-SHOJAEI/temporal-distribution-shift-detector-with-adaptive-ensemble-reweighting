@@ -147,18 +147,22 @@ def create_oracle_ensemble(X: pd.DataFrame, y: pd.Series, config: Config) -> Dic
     for name, model in models.items():
         logger.info(f"Training oracle {name}...")
 
-        # Train model
-        model.fit(X, y)
+        try:
+            # Train model
+            model.fit(X, y)
 
-        # Cross-validation score as oracle performance
-        cv_scores = cross_val_score(model, X, y, cv=3, scoring="accuracy")
-        oracle_models[name] = {
-            "model": model,
-            "cv_score": cv_scores.mean(),
-            "cv_std": cv_scores.std(),
-        }
+            # Cross-validation score as oracle performance
+            cv_scores = cross_val_score(model, X, y, cv=3, scoring="accuracy")
+            oracle_models[name] = {
+                "model": model,
+                "cv_score": cv_scores.mean(),
+                "cv_std": cv_scores.std(),
+            }
 
-        logger.info(f"Oracle {name} CV score: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+            logger.info(f"Oracle {name} CV score: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+        except Exception as e:
+            logger.warning(f"Oracle {name} failed (sklearn compatibility): {e}. Skipping.")
+            continue
 
     return oracle_models
 

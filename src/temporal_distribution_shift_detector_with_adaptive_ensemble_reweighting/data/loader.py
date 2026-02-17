@@ -45,6 +45,8 @@ class DataLoader:
             logger.info("Loading Covertype dataset...")
             data = fetch_covtype(return_X_y=True, as_frame=True)
             X, y = data
+            # Normalize labels to 0-indexed (Covertype uses 1-7)
+            y = y - 1
             logger.info(f"Loaded Covertype dataset: {X.shape[0]} samples, {X.shape[1]} features")
             return X, y
         except Exception as e:
